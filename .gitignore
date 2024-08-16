@@ -12,6 +12,7 @@
 /build
 
 # misc
+reqLog.txt
 .env
 .DS_Store
 .env.local
