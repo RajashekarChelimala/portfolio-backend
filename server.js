@@ -17,8 +17,7 @@ import registerRoutes from './routes/register.js';
 import authRoutes from './routes/auth.js';  
 import serviceRoutes from './routes/service.js';  
 import todoRoutes from './routes/todoRoutes.js';
-// import refreshRoutes from './routes/refresh.js';  
-// import logoutRoutes from './routes/logout.js';  
+// import refreshRoutes from './routes/refresh.js'; 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -57,8 +56,8 @@ app.use('/', rootRoutes);
 app.use('/register', registerRoutes);
 app.use('/auth', authRoutes);
 app.use('/headerServices', serviceRoutes);
+app.use('/allPosts', postRoutes);
 // app.use('/refresh', refreshRoutes);
-// app.use('/logout', logoutRoutes);
 
 app.use(verifyJWT);
 app.use('/todo', todoRoutes);
