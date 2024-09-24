@@ -16,6 +16,7 @@ import postRoutes from './routes/post.js';
 import registerRoutes from './routes/register.js';
 import authRoutes from './routes/auth.js';  
 import serviceRoutes from './routes/service.js';  
+import contactRoutes from './routes/contact.js';  
 import todoRoutes from './routes/todoRoutes.js';
 // import refreshRoutes from './routes/refresh.js'; 
 
@@ -57,6 +58,7 @@ app.use('/register', registerRoutes);
 app.use('/auth', authRoutes);
 app.use('/headerServices', serviceRoutes);
 app.use('/allPosts', postRoutes);
+app.use('/contact', contactRoutes);
 // app.use('/refresh', refreshRoutes);
 
 app.use(verifyJWT);
