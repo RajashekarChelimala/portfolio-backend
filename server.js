@@ -20,6 +20,7 @@ import serviceRoutes from './routes/service.js';
 import contactRoutes from './routes/contact.js';  
 import todoRoutes from './routes/todoRoutes.js';
 import skillRoutes from './routes/skill.js';
+import contentRoutes from './routes/content.js';
 // import refreshRoutes from './routes/refresh.js'; 
 
 const app = express();
@@ -63,6 +64,7 @@ app.use('/posts', postRoutes);
 app.use('/services', serviceRoutes);
 app.use('/projects', projectRoutes);
 app.use('/skills', skillRoutes);
+app.use('/content', contentRoutes);
 
 app.use(verifyJWT);
 app.use('/todo', todoRoutes);
