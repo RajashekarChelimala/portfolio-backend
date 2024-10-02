@@ -13,11 +13,13 @@ import mongoose from 'mongoose';
 import connectDB from './config/dbConn.js';  
 import rootRoutes from './routes/root.js';  
 import postRoutes from './routes/post.js';
+import projectRoutes from './routes/project.js';
 import registerRoutes from './routes/register.js';
 import authRoutes from './routes/auth.js';  
 import serviceRoutes from './routes/service.js';  
 import contactRoutes from './routes/contact.js';  
 import todoRoutes from './routes/todoRoutes.js';
+import skillRoutes from './routes/skill.js';
 // import refreshRoutes from './routes/refresh.js'; 
 
 const app = express();
@@ -56,15 +58,14 @@ app.use('/', express.static(path.join(__dirname, '/public')));
 app.use('/', rootRoutes);
 app.use('/register', registerRoutes);
 app.use('/auth', authRoutes);
-app.use('/headerServices', serviceRoutes);
-app.use('/allPosts', postRoutes);
 app.use('/contact', contactRoutes);
-// app.use('/refresh', refreshRoutes);
+app.use('/posts', postRoutes);
+app.use('/services', serviceRoutes);
+app.use('/projects', projectRoutes);
+app.use('/skills', skillRoutes);
 
 app.use(verifyJWT);
 app.use('/todo', todoRoutes);
-app.use('/posts', postRoutes);
-app.use('/services', serviceRoutes);
 // app.use('/users', userRoutes);
 
 app.all('*', (req, res) => {

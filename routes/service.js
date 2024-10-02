@@ -1,18 +1,23 @@
 import express from "express";
-import {handleNewService,getAllServices,getService,deleteService,updateService, getAllActiveServices} from "../controllers/serviceController.js";
+import {
+  handleNewService,
+  getAllServices,
+  getService,
+  deleteService,
+  updateService,
+  getAllActiveServices,
+} from "../controllers/serviceController.js";
+import verifyJWT from "../middlewares/verifyJWT.js";
 
 const router = express.Router();
 
-router.route('/')
-    .post(handleNewService)
-    .get(getAllServices)
-    .put(updateService);
+router.route("/").get(getAllServices);
+router.route("/activeServices").get(getAllActiveServices);
+router.route("/:id").get(getService);
 
-router.route('/activeServices')
-    .get(getAllActiveServices)
+router.use(verifyJWT);
+router.route("/").post(handleNewService).put(updateService);
 
-router.route('/:id')
-    .get(getService)
-    .delete(deleteService);
+router.route("/:id").delete(deleteService);
 
 export default router;

@@ -1,16 +1,15 @@
 import express from "express";
 import {handleNewPost,getAllPosts,getPost,deletePost,updatePost,likePost,engagePost,getPostInteractions} from "../controllers/postController.js";
+import verifyJWT from "../middlewares/verifyJWT.js";
 
 const router = express.Router();
 
-router.route('/')
-    .post(handleNewPost)
-    .get(getAllPosts)
-    .put(updatePost);
+// Public route for getting all posts
+// Route for getting all posts (no JWT required)
+router.route('/').get(getAllPosts); // No JWT required here
 
-router.route('/:id')
-    .get(getPost)
-    .delete(deletePost);
+// Route for getting a specific post (no JWT required)
+router.route('/:id').get(getPost); // No JWT required here
 
 // Interaction routes
 router.route('/:id/like')
@@ -21,5 +20,15 @@ router.route('/:id/engage')
 
 router.route('/:id/interactions')
   .get(getPostInteractions); // Route to get interactions for a post
+
+
+// Protected routes (only accessible via /posts and requires JWT)
+router.use(verifyJWT);  // Apply JWT protection to the following routes
+router.route('/')
+    .post(handleNewPost)
+    .put(updatePost);
+
+router.route('/:id')
+    .delete(deletePost);
 
 export default router;
