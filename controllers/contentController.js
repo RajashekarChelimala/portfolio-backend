@@ -99,23 +99,23 @@ export const updateContent = async (req, res) => {
     }
 
     // Update fields
-    content.name = name || content.name;
-    content.hobbies = hobbies || content.hobbies;
-    content.organization = organization || content.organization;
-    content.designation = designation || content.designation;
-    content.location = location || content.location;
-    content.degree = degree || content.degree;
-    content.education = education || content.education;
-    content.languages = languages || content.languages;
-    content.footerText = footerText || content.footerText;
-    content.introduction = introduction || content.introduction;
-    content.imageLink = imageLink || content.imageLink;
-    content.resumeLink = resumeLink || content.resumeLink;
-    content.typeWriterText = typeWriterText || content.typeWriterText;
-    content.instagram = instagram || content.instagram;
-    content.twitter = twitter || content.twitter;
-    content.linkedin = linkedin || content.linkedin;
-    content.github = github || content.github;
+    content.name = name;
+    content.hobbies = hobbies;
+    content.organization = organization;
+    content.designation = designation;
+    content.location = location;
+    content.degree = degree;
+    content.education = education;
+    content.languages = languages;
+    content.footerText = footerText;
+    content.introduction = introduction;
+    content.imageLink = imageLink;
+    content.resumeLink = resumeLink;
+    content.typeWriterText = typeWriterText;
+    content.instagram = instagram;
+    content.twitter = twitter;
+    content.linkedin = linkedin;
+    content.github = github 
 
     const updatedContent = await content.save();
     res.json(updatedContent);
