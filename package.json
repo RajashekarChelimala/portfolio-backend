@@ -11,6 +11,7 @@
   "author": "Rajashekar Chelimala",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -21,7 +22,10 @@
     "mongoose": "^8.5.1",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.15",
-    "uuid": "^10.0.0"
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^10.0.0",
+    "winston": "^3.15.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

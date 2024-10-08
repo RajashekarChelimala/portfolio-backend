@@ -21,6 +21,7 @@ import contactRoutes from './routes/contact.js';
 import todoRoutes from './routes/todoRoutes.js';
 import skillRoutes from './routes/skill.js';
 import contentRoutes from './routes/content.js';
+import { swaggerSetup } from './middlewares/swagger.js';
 // import refreshRoutes from './routes/refresh.js'; 
 
 const app = express();
@@ -52,6 +53,8 @@ app.use(express.json());
 // Middleware for cookies
 app.use(cookieParser());
 
+swaggerSetup(app);
+
 // Serve static files
 app.use('/', express.static(path.join(__dirname, '/public')));
 
@@ -70,6 +73,8 @@ app.use(verifyJWT);
 app.use('/todo', todoRoutes);
 // app.use('/users', userRoutes);
 
+app.use(errorHandler);
+
 app.all('*', (req, res) => {
     console.log(req.body);
     res.status(404);
@@ -81,8 +86,6 @@ app.all('*', (req, res) => {
         res.type('txt').send("404 Not Found");
     }
 });
-
-app.use(errorHandler);
 
 // Mongoose connection
 mongoose.connection.once('open', () => {

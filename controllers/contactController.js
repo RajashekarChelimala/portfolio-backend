@@ -1,6 +1,7 @@
 import Contact from "../models/Contact.js";
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import axios from "axios";
 
 dotenv.config();
 
@@ -52,7 +53,24 @@ export const handleNewContact = async (req, res) => {
   try {
     // Destructure the request body
     console.log("controller::" + req.body);
-    const { name, email, mobileNumber, message } = req.body;
+    const { name, email, mobileNumber, message, recaptchaToken } = req.body;
+
+    const verificationResponse = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify`,
+      null,
+      {
+        params: {
+          secret: process.env.RECAPTCHA_SECRET_KEY,
+          response: recaptchaToken,
+        },
+      }
+    );
+
+    const { success } = verificationResponse.data;
+
+    if (!success) {
+      return res.status(400).json({ error: "reCAPTCHA verification failed." });
+    }
 
     // Check if all required fields are present
     if (!email) {
