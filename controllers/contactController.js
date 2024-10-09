@@ -66,6 +66,8 @@ export const handleNewContact = async (req, res) => {
       }
     );
 
+    console.log("reCAPTCHA verification response:", verificationResponse.data);
+
     const { success } = verificationResponse.data;
 
     if (!success) {
