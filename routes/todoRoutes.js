@@ -5,16 +5,17 @@ import {
   updateTodo,
   deleteTodo,
 } from "../controllers/todoController.js";
+import verifyJWT from "../middlewares/verifyJWT.js";
 
 const router = express.Router();
 
 router
   .route("/")
-  .get(getTodos)
-  .post(createTodo)
-  .put(updateTodo);
+  .get(verifyJWT,getTodos)
+  .post(verifyJWT,createTodo)
+  .put(verifyJWT,updateTodo);
 
 router.route('/:id')
-  .delete(deleteTodo);
+  .delete(verifyJWT,deleteTodo);
 
 export default router;

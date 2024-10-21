@@ -21,7 +21,6 @@ import contactRoutes from './routes/contact.js';
 import todoRoutes from './routes/todoRoutes.js';
 import skillRoutes from './routes/skill.js';
 import contentRoutes from './routes/content.js';
-import { swaggerSetup } from './middlewares/swagger.js';
 // import refreshRoutes from './routes/refresh.js'; 
 
 const app = express();
@@ -52,8 +51,6 @@ app.use(express.json());
 
 // Middleware for cookies
 app.use(cookieParser());
-
-swaggerSetup(app);
 
 // Serve static files
 app.use('/', express.static(path.join(__dirname, '/public')));
