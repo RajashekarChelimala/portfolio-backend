@@ -34,7 +34,7 @@ export const deletePost = async (req, res) => {
 
     const result = await Post.findByIdAndDelete(id);
     if (!result) return res.status(404).json({ error: "Post not found" });
-
+    req.io.emit("deletePost", id);
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -64,6 +64,7 @@ export const handleNewPost = async (req, res) => {
     // Save the post to the database
     const savedPost = await newPost.save();
 
+    req.io.emit("newPost", savedPost);
     // Send a response with the created post
     res.status(201).json(savedPost);
   } catch (error) {
@@ -88,6 +89,7 @@ export const updatePost = async (req, res) => {
     if (req.body?.content) post.content = req.body.content;
     if (req.body?.image) post.image = req.body.image;
     const result = await post.save();
+    req.io.emit("updatePost", result);
     res.json(result);
   } catch (error) {
     // Handle any errors that occurred during the process

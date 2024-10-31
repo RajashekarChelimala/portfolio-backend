@@ -9,19 +9,6 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-/**
- * @swagger
- * /contact:
- *   get:
- *     summary: Get all contact requests
- *     description: Retrieve all the contact requests from the system
- *     responses:
- *       200:
- *         description: Successful retrieval of contact requests
- *       500:
- *         description: Internal server error
- */
-
 // Define routes
 router.route('/')
     .post(handleNewContact)     // Public route for adding new contact

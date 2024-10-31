@@ -21,9 +21,23 @@ import contactRoutes from './routes/contact.js';
 import todoRoutes from './routes/todoRoutes.js';
 import skillRoutes from './routes/skill.js';
 import contentRoutes from './routes/content.js';
+import jwt from 'jsonwebtoken';
 // import refreshRoutes from './routes/refresh.js'; 
+import http from "http";
+import { Server } from "socket.io";
 
 const app = express();
+
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+      origin: "http://localhost:3000", // Adjust to your client's origin
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
+  });
+  
+
 const PORT = process.env.PORT || 5000;
 
 // Resolve __dirname in ES Modules
@@ -32,6 +46,35 @@ const __dirname = path.dirname(__filename);
 
 // Connect to MongoDB
 connectDB();
+// Middleware for JWT authentication
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (token) {
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          console.error("JWT Verification Error:", err); // Log any verification error
+          return next(new Error("Unauthorized"));
+        }
+        next();
+      });
+    } else {
+      // Allow connection without token, assuming no authorization needed for this socket
+      next(); 
+    }
+  });
+  
+  
+  // Handle socket connection
+  io.on("connection", (socket) => {
+    console.log("A user connected:");
+    // Additional event listeners can go here
+  });
+  
+  // Make io accessible to the routes
+  app.use((req, res, next) => {
+    req.io = io;
+    next();
+  });
 
 // Custom middleware logger
 app.use(logger);
@@ -87,5 +130,5 @@ app.all('*', (req, res) => {
 // Mongoose connection
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });

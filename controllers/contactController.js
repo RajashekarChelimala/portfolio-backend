@@ -96,6 +96,9 @@ export const handleNewContact = async (req, res) => {
     // Save the Contact to the database
     const savedContact = await newContact.save();
 
+    // Emit a new contact event to all connected clients
+    req.io.emit("newContact", savedContact);
+    
     // Send a response with the created Contact
     res.status(201).json(savedContact);
   } catch (error) {
