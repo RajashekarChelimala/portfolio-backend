@@ -31,7 +31,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000", // Adjust to your client's origin
+      origin: process.env.REACT_APP_FRONTEND_URL, // Adjust to your client's origin
       methods: ["GET", "POST"],
       credentials: true,
     },
