@@ -6,94 +6,151 @@ import Project from './models/Project.js';
 import Post from './models/Post.js';
 import Service from './models/Service.js';
 
-async function seed() {
-  await mongoose.connect(process.env.DATABASE_URI || 'mongodb://localhost:27017/Portfolio');
-  console.log('Connected to MongoDB for seeding');
+async function seedDatabase() {
+  const uri = process.env.DATABASE_URI;
+  if (!uri) {
+    console.error('DATABASE_URI is not defined in portfolio-backend/.env');
+    process.exit(1);
+  }
 
-  // 1. Content
-  let existingContent = await Content.findOne();
-  if (!existingContent) {
-    await Content.create({
-      name: "Rajashekar Chelimala",
-      hobbies: "System Design, Open Source, Technical Writing, Photography",
-      organization: "Software Development",
-      designation: "Full Stack Engineer",
-      location: "Hyderabad, India",
-      degree: "B.Tech in Computer Science & Engineering",
-      education: "Jawaharlal Nehru Technological University",
-      languages: "English, Telugu, Hindi",
-      footerText: "Crafted with precision & passion by Rajashekar Chelimala. © 2026",
-      introduction: "<p>Hello! I am a passionate Full Stack Software Engineer specializing in building scalable web architectures, resilient microservices, and sleek modern user experiences. Proficient across the MERN stack, Java Spring Boot, and cloud environments.</p>",
-      imageLink: "/my-image.png",
-      resumeLink: "https://drive.google.com/file/d/sample-resume/preview",
-      typeWriterText: "Full Stack Developer,React & Next.js Specialist,Java & Spring Boot Engineer,Cloud Solutions Architect",
-      instagram: "https://instagram.com/RajashekarChelimala",
-      twitter: "https://twitter.com/RajashekarChelimala",
-      linkedin: "https://linkedin.com/in/rajashekarchelimala",
-      github: "https://github.com/RajashekarChelimala"
-    });
-    console.log('Default content seeded.');
+  console.log(`Connecting to MongoDB: ${uri.replace(/:([^@]+)@/, ':****@')}`);
+  await mongoose.connect(uri);
+  console.log('Connected to MongoDB successfully!');
+
+  // ================= 1. CONTENT =================
+  const contentPayload = {
+    name: "Rajashekar Chelimala",
+    designation: "Java Full Stack Developer",
+    organization: "Centre for Good Governance (CGG)",
+    location: "Hyderabad, Telangana",
+    degree: "B.Tech in Computer Science Engineering (CGPA: 8.4 / 10.0)",
+    education: "Rajiv Gandhi University of Knowledge Technologies (RGUKT), Basar",
+    languages: "English, Telugu, Hindi",
+    footerText: "Crafted with precision & passion by Rajashekar Chelimala. © 2026",
+    introduction: "<p>Java Full Stack Developer with <strong>3+ years of experience</strong> building large-scale enterprise and financial applications using <strong>Java, Spring Boot, Spring MVC, React.js, Hibernate, PostgreSQL, and AWS</strong>.</p><p>Experienced in developing REST APIs, transactional workflows, role-based access control (RBAC), approval hierarchies, and database-driven applications. Contributed to financial management platforms supporting <strong>160+ municipal offices</strong> and enterprise HR systems supporting <strong>100,000+ users</strong>. Skilled in legacy modernization, performance optimization, cloud deployment, and Agile development.</p>",
+    imageLink: "/my-image.png",
+    resumeLink: "https://drive.google.com/file/d/sample-resume/preview",
+    typeWriterText: "Java Full Stack Developer,Spring Boot & Microservices Specialist,React.js Frontend Engineer,AWS Cloud Solutions Architect,High-Scale Enterprise Systems Engineer",
+    hobbies: "Enterprise Architecture, Distributed Microservices, Open Source, AI & Voice Agents, Performance Optimization",
+    instagram: "https://instagram.com/RajashekarChelimala",
+    twitter: "https://twitter.com/RajashekarChelimala",
+    linkedin: "https://www.linkedin.com/in/rajashekar-chelimala",
+    github: "https://github.com/RajashekarChelimala"
+  };
+
+  const existingContent = await Content.findOne();
+  if (existingContent) {
+    await Content.findByIdAndUpdate(existingContent._id, contentPayload);
+    console.log('Profile Content updated in database.');
   } else {
-    console.log('Content already exists.');
+    await Content.create(contentPayload);
+    console.log('Profile Content created in database.');
   }
 
-  // 2. Skills
-  let skills = await Skill.find();
-  if (skills.length === 0) {
-    skills = await Skill.insertMany([
-      { name: "React.js", type: "Frontend", priorityOrder: "1", experience: "3+ Years", organizationName: "Industry Experience", icon: "react-icon" },
-      { name: "JavaScript (ES6+)", type: "Frontend", priorityOrder: "2", experience: "4+ Years", organizationName: "Industry Experience", icon: "js-icon" },
-      { name: "TypeScript", type: "Languages", priorityOrder: "3", experience: "2+ Years", organizationName: "Industry Experience", icon: "typescript-icon" },
-      { name: "Node.js & Express", type: "Backend", priorityOrder: "4", experience: "3+ Years", organizationName: "Industry Experience", icon: "node-icon" },
-      { name: "Java & Spring Boot", type: "Backend", priorityOrder: "5", experience: "2+ Years", organizationName: "Industry Experience", icon: "java-icon" },
-      { name: "MongoDB & Mongoose", type: "Database", priorityOrder: "6", experience: "3+ Years", organizationName: "Industry Experience", icon: "mysql-icon" },
-      { name: "HTML5 / CSS3 / SASS", type: "Frontend", priorityOrder: "7", experience: "4+ Years", organizationName: "Industry Experience", icon: "html-icon" },
-      { name: "REST APIs & WebSockets", type: "Architecture", priorityOrder: "8", experience: "3+ Years", organizationName: "Industry Experience", icon: "bootstrap-icon" }
-    ]);
-    console.log('Skills seeded.');
-  }
+  // ================= 2. SKILLS =================
+  // Clear and re-populate skills with verified resume data
+  await Skill.deleteMany({});
+  const skillDocs = await Skill.insertMany([
+    // Languages
+    { name: "Java", type: "Languages", priorityOrder: "1", experience: "3+ Years", organizationName: "CGG", icon: "java-icon" },
+    { name: "JavaScript (ES6+)", type: "Languages", priorityOrder: "2", experience: "3+ Years", organizationName: "CGG & Freelance", icon: "js-icon" },
+    { name: "SQL", type: "Languages", priorityOrder: "3", experience: "3+ Years", organizationName: "CGG", icon: "mysql-icon" },
 
-  const skillIds = skills.map(s => s._id);
+    // Backend
+    { name: "Spring Boot", type: "Backend", priorityOrder: "4", experience: "3+ Years", organizationName: "CGG", icon: "java-icon" },
+    { name: "Spring Security & RBAC", type: "Backend", priorityOrder: "5", experience: "3+ Years", organizationName: "CGG", icon: "java-icon" },
+    { name: "Spring Data JPA & Hibernate", type: "Backend", priorityOrder: "6", experience: "3+ Years", organizationName: "CGG", icon: "java-icon" },
+    { name: "Spring MVC & JSP", type: "Backend", priorityOrder: "7", experience: "2+ Years", organizationName: "CGG", icon: "java-icon" },
+    { name: "Node.js & Express.js", type: "Backend", priorityOrder: "8", experience: "2+ Years", organizationName: "Freelance AI Platform", icon: "node-icon" },
+    { name: "REST APIs & Microservices", type: "Backend", priorityOrder: "9", experience: "3+ Years", organizationName: "CGG & Freelance", icon: "api-icon" },
 
-  // 3. Projects
-  const projectCount = await Project.countDocuments();
-  if (projectCount === 0) {
-    await Project.insertMany([
-      {
-        projectName: "Enterprise MERN CMS & Dynamic Portfolio",
-        organizationName: "Personal Initiative",
-        fromDate: new Date("2024-01-01"),
-        toDate: new Date(),
-        currentlyWorking: true,
-        description: "Full-stack portfolio and real-time content management system featuring JWT role-based security, WebSockets for live alerts, rich text editing, and dynamic portfolio content sync.",
-        projectLink: "https://github.com/RajashekarChelimala/portfolio-admin",
-        skills: skillIds.slice(0, 4)
-      },
-      {
-        projectName: "Cloud Microservices Backend Platform",
-        organizationName: "Engineering Project",
-        fromDate: new Date("2023-06-01"),
-        toDate: new Date("2023-12-31"),
-        currentlyWorking: false,
-        description: "Scalable backend architecture featuring distributed authentication, rate limiting, MongoDB aggregation pipelines, and automated email dispatching with nodemailer.",
-        projectLink: "https://github.com/RajashekarChelimala/portfolio-backend",
-        skills: skillIds.slice(3, 7)
-      },
-      {
-        projectName: "Real-time Collaboration & Analytics Hub",
-        organizationName: "FinTech Innovation",
-        fromDate: new Date("2023-01-01"),
-        toDate: new Date("2023-05-31"),
-        currentlyWorking: false,
-        description: "Interactive dashboard featuring real-time collaborative task tracking, socket synchronization, analytics charts, and comprehensive audit logs.",
-        projectLink: "https://github.com/RajashekarChelimala",
-        skills: [skillIds[0], skillIds[4], skillIds[6]]
-      }
-    ]);
-    console.log('Projects seeded.');
-  }
+    // Frontend
+    { name: "React.js", type: "Frontend", priorityOrder: "10", experience: "3+ Years", organizationName: "CGG & Freelance", icon: "react-icon" },
+    { name: "HTML5 & CSS3", type: "Frontend", priorityOrder: "11", experience: "3+ Years", organizationName: "CGG", icon: "html-icon" },
+    { name: "Material-UI (MUI)", type: "Frontend", priorityOrder: "12", experience: "2+ Years", organizationName: "CGG", icon: "css-icon" },
+    { name: "Bootstrap 5", type: "Frontend", priorityOrder: "13", experience: "3+ Years", organizationName: "CGG", icon: "bootstrap-icon" },
 
-  // 4. Services
+    // Databases
+    { name: "PostgreSQL", type: "Database", priorityOrder: "14", experience: "3+ Years", organizationName: "CGG", icon: "mysql-icon" },
+    { name: "MongoDB", type: "Database", priorityOrder: "15", experience: "2+ Years", organizationName: "Freelance AI Platform", icon: "mysql-icon" },
+
+    // Cloud & DevOps
+    { name: "AWS (EC2, S3, Lambda, Route53, SES)", type: "Cloud & DevOps", priorityOrder: "16", experience: "2+ Years", organizationName: "CGG & Freelance", icon: "docker-icon" },
+    { name: "Docker", type: "Cloud & DevOps", priorityOrder: "17", experience: "2+ Years", organizationName: "CGG & Freelance", icon: "docker-icon" },
+    { name: "Git, GitHub & GitLab CI/CD", type: "Cloud & DevOps", priorityOrder: "18", experience: "3+ Years", organizationName: "CGG", icon: "github-icon" },
+  ]);
+  console.log(`Seeded ${skillDocs.length} technical skills.`);
+
+  const skillMap = {};
+  skillDocs.forEach(s => {
+    skillMap[s.name] = s._id;
+  });
+
+  // Helper to safely map skill IDs
+  const getSkillIds = (names) => {
+    return names
+      .map(name => skillMap[name] || Object.entries(skillMap).find(([k]) => k.includes(name))?.[1])
+      .filter(Boolean);
+  };
+
+  // ================= 3. PROJECTS =================
+  // Clear and re-populate verified production projects from Resume
+  await Project.deleteMany({});
+  await Project.insertMany([
+    {
+      projectName: "Telangana Police HRMS",
+      organizationName: "Centre for Good Governance (CGG)",
+      projectLink: "https://tgpolice.cgg.gov.in",
+      fromDate: new Date("2023-06-01"),
+      toDate: new Date(),
+      currentlyWorking: true,
+      description: "Large-scale Human Resource Management System supporting 100,000+ police personnel with a multi-level organizational hierarchy across the Telangana Police department. Implemented employee leave management, grievance handling, transfer allotment workflows, and multi-level approval processes with role-based access control (RBAC). Integrated Amazon S3 for secure document uploads, Amazon SES for email notifications, and supported deployment on AWS EC2 while optimizing SQL queries and maintaining Spring MVC/JSP modules.",
+      skills: getSkillIds(["Spring Boot", "Spring MVC & JSP", "PostgreSQL", "React.js", "AWS (EC2, S3, Lambda, Route53, SES)"])
+    },
+    {
+      projectName: "Municipal Administration Financial Management System",
+      organizationName: "Centre for Good Governance (CGG)",
+      projectLink: "https://tgerplive.cgg.gov.in",
+      fromDate: new Date("2023-06-01"),
+      toDate: new Date(),
+      currentlyWorking: true,
+      description: "Centralized double-entry accounting web application serving 160+ municipal offices across Telangana, supporting end-to-end accounting, budgeting, treasury, and financial reporting operations. Engineered complex work order workflows with 100+ dynamic fields, conditional validations, approval hierarchies, and secure document management capabilities.",
+      skills: getSkillIds(["Spring Boot", "Spring Data JPA & Hibernate", "PostgreSQL", "React.js", "REST APIs & Microservices"])
+    },
+    {
+      projectName: "Agricultural University Financial System",
+      organizationName: "Centre for Good Governance (CGG)",
+      projectLink: "https://pjtaufms.telangana.gov.in",
+      fromDate: new Date("2023-08-01"),
+      toDate: new Date("2024-06-30"),
+      currentlyWorking: false,
+      description: "Centralized financial platform serving 10+ constituent colleges with configurable approval workflows, user roles, and permission structures. Implemented robust two-factor authentication (2FA) through Email and SMS OTP, securing access for 500+ active faculty and administrative users.",
+      skills: getSkillIds(["Spring Boot", "Spring Security & RBAC", "PostgreSQL", "React.js", "Bootstrap 5"])
+    },
+    {
+      projectName: "Housing Corporation Financial Portal",
+      organizationName: "Centre for Good Governance (CGG)",
+      projectLink: "https://tghclfms.cgg.gov.in",
+      fromDate: new Date("2023-06-01"),
+      toDate: new Date("2024-02-28"),
+      currentlyWorking: false,
+      description: "Modernized a legacy Struts/JSP financial system to Spring Boot and React.js, improving application performance, responsiveness, and reducing technical debt across 60+ critical accounting screens.",
+      skills: getSkillIds(["Spring Boot", "React.js", "PostgreSQL", "Spring Data JPA & Hibernate"])
+    },
+    {
+      projectName: "AI-Powered Candidate Screening Platform",
+      organizationName: "Independent (Remote)",
+      projectLink: "https://github.com/RajashekarChelimala",
+      fromDate: new Date("2024-12-01"),
+      toDate: new Date("2025-12-31"),
+      currentlyWorking: false,
+      description: "Built an AI-powered candidate screening platform using React.js, Node.js, Express.js, and MongoDB, supporting AI-based interview evaluation, transcript analysis, and role-based workflows. Architected microservices with Python FastAPI services for Speech-to-Text (STT using whisper.cpp), TTS, and Qwen-based question and candidate feedback generation communicating via REST APIs. Deployed on AWS EC2, S3, IAM, CloudWatch, and MongoDB.",
+      skills: getSkillIds(["React.js", "Node.js & Express.js", "MongoDB", "AWS (EC2, S3, Lambda, Route53, SES)", "Docker"])
+    }
+  ]);
+  console.log('Seeded 5 verified production projects.');
+
+  // ================= 4. SERVICES =================
   const serviceCount = await Service.countDocuments();
   if (serviceCount === 0) {
     await Service.insertMany([
@@ -104,27 +161,29 @@ async function seed() {
       { serviceName: "Contact", iconName: "fa-envelope", targetUrl: "/contact", displayOrder: 5, isActive: true },
       { serviceName: "Resume", iconName: "fa-file-alt", targetUrl: "/resume", displayOrder: 6, isActive: true }
     ]);
-    console.log('Services seeded.');
+    console.log('Seeded services.');
   }
 
-  // 5. Sample Post
+  // ================= 5. ARTICLES / POSTS =================
   const postCount = await Post.countDocuments();
   if (postCount === 0) {
     await Post.create({
-      headline: "Building Scalable Modern Web Applications with MERN & WebSockets",
-      content: "<p>Modern web engineering requires responsiveness, low latency, and modular architecture. In this article, we explore how combining React, Node.js, and Socket.IO creates engaging real-time user experiences with seamless synchronization.</p><p>Key principles include state isolation, optimistic updates, and robust error boundaries to guarantee 99.9% client uptime even during flaky connections.</p>",
+      headline: "Architecting Large-Scale Enterprise Systems with Spring Boot & Microservices",
+      content: "<p>Building software for 100,000+ users and 160+ municipal offices requires deep architectural discipline. From double-entry accounting to multi-level approval hierarchies, transactional consistency and role-based access control (RBAC) are paramount.</p><p>By combining Spring Boot, PostgreSQL query optimization, and modern React.js frontend interfaces, legacy Struts systems can be successfully modernized into high-performance, maintainable platforms with zero data loss.</p>",
       image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
-      likes: 42,
-      engagementCount: 78
+      likes: 54,
+      engagementCount: 92
     });
-    console.log('Sample post seeded.');
+    console.log('Sample engineering article seeded.');
   }
 
-  console.log('All seeding completed successfully!');
+  console.log('\n===========================================');
+  console.log('DATABASE SEEDING COMPLETED SUCCESSFULLY!');
+  console.log('===========================================');
   process.exit(0);
 }
 
-seed().catch(err => {
-  console.error('Seeding error:', err);
+seedDatabase().catch(err => {
+  console.error('Seeding Error:', err);
   process.exit(1);
 });
