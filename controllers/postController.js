@@ -110,17 +110,17 @@ export const likePost = async (req, res) => {
         if (interaction.liked) {
           // Unliking the post
           interaction.liked = false; // Mark as unliked
-          post.likes -= 1; // Decrease likes count
+          post.likes = Math.max(0, (post.likes || 1) - 1); // Decrease likes count safely
           await interaction.save(); // Save interaction changes
           await post.save(); // Save post changes
-          return res.status(201).json({ message: "Post unliked successfully." });
+          return res.status(200).json({ message: "Post unliked successfully.", liked: false, likes: post.likes });
         } else {
           // Liking the post for the first time after unliking
           interaction.liked = true; // Mark as liked
-          post.likes += 1; // Increase likes count
+          post.likes = (post.likes || 0) + 1; // Increase likes count
           await interaction.save(); // Save interaction changes
           await post.save(); // Save post changes
-          return res.status(201).json({ message: "Post liked successfully." });
+          return res.status(200).json({ message: "Post liked successfully.", liked: true, likes: post.likes });
         }
       } else {
         // Creating a new interaction for liking
@@ -132,10 +132,10 @@ export const likePost = async (req, res) => {
           ipAddress,
         });
         await interaction.save();
-        post.likes += 1; // Increase likes count
-        post.engagementCount += 1; // Increment engagement count only for the first like
+        post.likes = (post.likes || 0) + 1; // Increase likes count
+        post.engagementCount = (post.engagementCount || 0) + 1; // Increment engagement count only for the first like
         await post.save();
-        return res.status(201).json({ message: "Post liked successfully." });
+        return res.status(200).json({ message: "Post liked successfully.", liked: true, likes: post.likes });
       }
     } catch (error) {
       console.error(error);

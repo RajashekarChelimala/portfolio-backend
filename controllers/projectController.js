@@ -4,7 +4,7 @@ import Skill from '../models/Skill.js'; // Import Skill model
 // Create a new project
 export const createProject = async (req, res) => {
   try {
-    const { projectName, description, skills, fromDate, toDate, currentlyWorking, projectLink, organizationName } = req.body;
+    const { projectName, description, skills, fromDate, toDate, currentlyWorking, projectLink, githubLink, organizationName } = req.body;
 
     // Validation
     if (!projectName || !description || !skills || !fromDate || (!currentlyWorking && !toDate) || !projectLink || !organizationName) {
@@ -26,6 +26,7 @@ export const createProject = async (req, res) => {
       toDate,
       currentlyWorking,
       projectLink,
+      githubLink: githubLink || '',
       organizationName
     });
 

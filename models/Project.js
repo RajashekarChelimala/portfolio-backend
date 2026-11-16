@@ -30,6 +30,10 @@ const projectSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  githubLink: {
+    type: String,
+    default: '',
+  },
   organizationName: {
     type: String,
     required: true,
