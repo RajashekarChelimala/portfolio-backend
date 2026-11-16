@@ -19,7 +19,7 @@ async function getDynamicCorpus() {
       if (liveContent.name) {
         corpus.push({
           id: "db_name",
-          topics: ["name", "surname", "full name", "chelimala", "rajashekar"],
+          topics: ["who is he", "what is his name", "full name", "chelimala", "rajashekar"],
           keywords: ["name", "surname", "full", "who"],
           answer: `Full Name: **${liveContent.name}** (Surname: **Chelimala**).`
         });
@@ -27,8 +27,8 @@ async function getDynamicCorpus() {
       if (liveContent.location) {
         corpus.push({
           id: "db_location",
-          topics: ["location", "city", "where", "address"],
-          keywords: ["location", "city", "live", "where"],
+          topics: ["location", "city", "where does he live", "where is he located", "address"],
+          keywords: ["location", "city", "live", "where", "based"],
           answer: `Rajashekar is currently located in **${liveContent.location}**.`
         });
       }
@@ -40,6 +40,14 @@ async function getDynamicCorpus() {
           answer: `Education: **${liveContent.degree || "B.Tech in CSE"}** from **${liveContent.education || "RGUKT, Basar"}**.`
         });
       }
+      if (liveContent.hobbies) {
+        corpus.push({
+          id: "db_hobbies",
+          topics: ["hobbies", "hobby", "interests", "free time", "what does he do in free time", "passions"],
+          keywords: ["hobbies", "hobby", "interests", "free", "time", "passions"],
+          answer: `Rajashekar's hobbies and interests include: **${liveContent.hobbies}**.`
+        });
+      }
     }
 
     const liveProjects = await Project.find().lean();
@@ -47,7 +55,7 @@ async function getDynamicCorpus() {
       for (const p of liveProjects) {
         corpus.push({
           id: `db_project_${p._id}`,
-          topics: [p.projectName.toLowerCase(), "project", "work"],
+          topics: [p.projectName.toLowerCase(), "project", "work", "portfolio project"],
           keywords: p.projectName.toLowerCase().split(/\s+/),
           answer: `**${p.projectName}** (${p.organizationName || "Featured"}):\n${p.description}${p.projectLink ? `\n• Live Link: ${p.projectLink}` : ""}${p.githubLink ? `\n• GitHub: ${p.githubLink}` : ""}`
         });
@@ -69,18 +77,33 @@ export const handleChat = async (req, res) => {
     const trimmedMessage = message.trim().slice(0, 500);
     const corpus = await getDynamicCorpus();
     const topMatches = retrieveRelevantChunks(trimmedMessage, corpus, 3);
-    const contextText = topMatches.map((m) => `• ${m.chunk.answer}`).join("\n\n");
+    const contextText = topMatches.map((m) => `[Source: ${m.chunk.id}]\n${m.chunk.answer}`).join("\n\n");
 
     const geminiKey = process.env.GEMINI_API_KEY;
 
     // If Gemini API key is configured, perform full LLM generation augmented with retrieved context
     if (geminiKey) {
       try {
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
-        const ragPrompt = `You are the AI Assistant for Rajashekar Chelimala's portfolio website. Answer the user question concisely, accurately, and politely based ONLY on the verified facts provided below. If you don't know, suggest checking his resume or contacting him.
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${geminiKey}`;
+        const ragPrompt = `You are the personal AI Assistant for Rajashekar Chelimala's official portfolio website.
+Your objective is to answer the user's question directly, accurately, politely, and with structured clarity based ONLY on the verified facts provided below.
 
-Verified Facts from Rajashekar's Database & Resume:
+CRITICAL RULES & GUARDRAILS:
+1. STRICT GROUNDING: Rely strictly on the verified facts below. Do NOT hallucinate or assume facts not stated.
+2. MISSING PERSONAL/FAMILY DETAILS: If the user asks about personal or family details not in the facts (such as father's name, mother's name, parents, wife, marital status, or exact date of birth), state honestly that this personal detail is not publicly available on his professional portfolio, and suggest contacting him directly at rajashekarchelimala1@gmail.com. Do NOT guess or default to his surname.
+3. GENDER & PRONOUNS: If asked about gender, Rajashekar is Male (pronouns: he/him).
+4. AI PROJECTS: If asked about AI projects, list his specific AI systems:
+   • AI-Powered Candidate Screening Platform (FastAPI, Whisper.cpp STT, Qwen LLM, AWS EC2, live at https://screener.tekavinya.com)
+   • Portfolio RAG AI Assistant (Node.js, Express, Google Gemini, Vector/BM25 Knowledge Engine)
+   • Comrade Encrypted Messaging Platform (Socket.io, React, Node.js, end-to-end encryption)
+5. TOP SKILLS: If asked for his top 5 skills, provide a crisp numbered list: Java & Spring Boot, React.js Frontend, PostgreSQL, AWS Cloud & DevOps, and AI/GenAI Integration.
+6. AWS PROJECTS: If asked which projects used AWS, explicitly mention Telangana Police HRMS (EC2, S3, SES) and the AI Candidate Screening Platform (EC2).
+7. CDMA: CDMA refers to the Commissioner & Director of Municipal Administration / Municipal Administration Financial Management System (160+ municipal offices across Telangana using Spring Boot, Hibernate, and PostgreSQL).
+8. FORMATTING: Use clean markdown bullet points (•) and bold text (**) for readability. Keep answers focused directly on the specific question.
+
+=== VERIFIED FACTS RETRIEVED FROM RESUME & DATABASE ===
 ${contextText}
+======================================================
 
 User Question: ${trimmedMessage}`;
 
@@ -89,8 +112,8 @@ User Question: ${trimmedMessage}`;
           {
             contents: [{ role: "user", parts: [{ text: ragPrompt }] }],
             generationConfig: {
-              temperature: 0.3, // Low temperature for high factual accuracy
-              maxOutputTokens: 300,
+              temperature: 0.2, // Low temperature for high factual accuracy
+              maxOutputTokens: 800,
             },
           },
           { headers: { "Content-Type": "application/json" }, timeout: 8000 }
@@ -105,13 +128,13 @@ User Question: ${trimmedMessage}`;
       }
     }
 
-    // Direct RAG retrieval response (instant, highly accurate, zero API key required)
+    // Direct RAG retrieval fallback response (instant, highly accurate, zero API key required)
     const ragAnswer = queryRAG(trimmedMessage, corpus);
     return res.status(200).json({ reply: ragAnswer });
   } catch (err) {
     console.error("Chat controller error:", err);
     return res.status(500).json({
-      reply: "I'm having trouble processing your question right now. Feel free to reach Rajashekar directly through the Contact page!",
+      reply: "I'm having trouble processing your question right now. Feel free to reach Rajashekar directly at rajashekarchelimala1@gmail.com!",
     });
   }
 };
