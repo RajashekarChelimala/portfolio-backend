@@ -8,7 +8,7 @@ const postSchema = new Schema(
       type: String,
       required: [true, "Headline is required"],
       trim: true,
-      maxlength: 100,
+      maxlength: 150,
     },
     content: {
       type: String,
@@ -20,7 +20,8 @@ const postSchema = new Schema(
       trim: true,
       validate: {
         validator: function (v) {
-          return /^(http|https):\/\/[^ "]+$/.test(v); // validate the image URL
+          if (!v || v.trim() === "") return true; // Optional image URL
+          return /^(http|https):\/\/[^ "]+$/.test(v);
         },
         message: (props) => `${props.value} is not a valid URL`,
       },

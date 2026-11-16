@@ -21,6 +21,7 @@ import contactRoutes from './routes/contact.js';
 import todoRoutes from './routes/todoRoutes.js';
 import skillRoutes from './routes/skill.js';
 import contentRoutes from './routes/content.js';
+import mediaRoutes from './routes/media.js';
 import jwt from 'jsonwebtoken';
 // import refreshRoutes from './routes/refresh.js'; 
 import http from "http";
@@ -108,6 +109,7 @@ app.use('/services', serviceRoutes);
 app.use('/projects', projectRoutes);
 app.use('/skills', skillRoutes);
 app.use('/content', contentRoutes);
+app.use('/media', mediaRoutes);
 
 app.use(verifyJWT);
 app.use('/todo', todoRoutes);

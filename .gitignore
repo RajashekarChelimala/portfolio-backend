@@ -13,6 +13,9 @@
 
 # misc
 reqLog.txt
+logs/
+scripts/
+*.log
 .env
 .DS_Store
 .env.local

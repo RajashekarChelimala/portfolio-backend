@@ -43,56 +43,48 @@ export const deletePost = async (req, res) => {
 
 export const handleNewPost = async (req, res) => {
   try {
-    // Destructure the request body
-    console.log("controller::" + req.body);
     const { headline, content, image } = req.body;
 
-    // Check if all required fields are present
-    if (!headline) {
+    if (!headline || !headline.trim()) {
       return res.status(400).json({ error: "Headline is required" });
-    } else if (!content) {
+    } else if (!content || !content.trim()) {
       return res.status(400).json({ error: "Content is required" });
     }
 
-    // Create a new post document
     const newPost = new Post({
-      headline,
-      content,
-      image,
+      headline: headline.trim(),
+      content: content.trim(),
+      image: image && image.trim() !== "" ? image.trim() : undefined,
     });
 
-    // Save the post to the database
     const savedPost = await newPost.save();
-
-    req.io.emit("newPost", savedPost);
-    // Send a response with the created post
+    if (req.io) req.io.emit("newPost", savedPost);
     res.status(201).json(savedPost);
   } catch (error) {
-    // Handle any errors that occurred during the process
     res.status(500).json({ error: error.message });
   }
 };
 
 export const updatePost = async (req, res) => {
   try {
-    if (!req?.body?._id) {
+    const id = req.body?._id || req.body?.id;
+    if (!id) {
       return res.status(400).json({ message: "ID parameter is required." });
     }
 
-    const post = await Post.findOne({ _id: req.body._id }).exec();
+    const post = await Post.findById(id).exec();
     if (!post) {
-      return res
-        .status(204)
-        .json({ message: `No post matches ID ${req.body._id}.` });
+      return res.status(404).json({ message: `No post matches ID ${id}.` });
     }
-    if (req.body?.headline) post.headline = req.body.headline;
-    if (req.body?.content) post.content = req.body.content;
-    if (req.body?.image) post.image = req.body.image;
+    if (req.body?.headline !== undefined) post.headline = req.body.headline.trim();
+    if (req.body?.content !== undefined) post.content = req.body.content.trim();
+    if (req.body?.image !== undefined) {
+      post.image = req.body.image && req.body.image.trim() !== "" ? req.body.image.trim() : undefined;
+    }
     const result = await post.save();
-    req.io.emit("updatePost", result);
+    if (req.io) req.io.emit("updatePost", result);
     res.json(result);
   } catch (error) {
-    // Handle any errors that occurred during the process
     res.status(500).json({ error: error.message });
   }
 };

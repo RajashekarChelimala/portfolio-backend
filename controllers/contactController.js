@@ -55,30 +55,25 @@ export const handleNewContact = async (req, res) => {
     console.log("controller::" + req.body);
     const { name, email, mobileNumber, message, recaptchaToken } = req.body;
 
-    const verificationResponse = await axios.post(
-      `https://www.google.com/recaptcha/api/siteverify`,
-      null,
-      {
-        params: {
-          secret: process.env.RECAPTCHA_SECRET_KEY,
-          response: recaptchaToken,
-        },
+    if (process.env.RECAPTCHA_SECRET_KEY && recaptchaToken) {
+      const verificationResponse = await axios.post(
+        `https://www.google.com/recaptcha/api/siteverify`,
+        null,
+        {
+          params: {
+            secret: process.env.RECAPTCHA_SECRET_KEY,
+            response: recaptchaToken,
+          },
+        }
+      );
+      if (!verificationResponse.data?.success) {
+        return res.status(400).json({ error: "reCAPTCHA verification failed." });
       }
-    );
-
-    console.log("reCAPTCHA verification response:", verificationResponse.data);
-
-    const { success } = verificationResponse.data;
-
-    if (!success) {
-      return res.status(400).json({ error: "reCAPTCHA verification failed." });
     }
 
     // Check if all required fields are present
     if (!email) {
       return res.status(400).json({ error: "Email is required" });
-    } else if (!mobileNumber) {
-      return res.status(400).json({ error: "Mobile is required" });
     } else if (!message) {
       return res.status(400).json({ error: "Message is required" });
     } else if (!name) {
