@@ -19,8 +19,8 @@ async function getDynamicCorpus() {
       if (liveContent.name) {
         corpus.push({
           id: "db_name",
-          topics: ["who is he", "what is his name", "full name", "chelimala", "rajashekar"],
-          keywords: ["name", "surname", "full", "who"],
+          topics: ["surname", "last name", "family name", "what is his surname", "full name", "what is his full name"],
+          keywords: ["surname", "fullname", "name"],
           answer: `Full Name: **${liveContent.name}** (Surname: **Chelimala**).`
         });
       }
@@ -93,14 +93,17 @@ CRITICAL RULES & GUARDRAILS:
 2. STRICT GROUNDING: Rely strictly on the verified facts below. Do NOT hallucinate or assume facts not stated.
 3. MISSING PERSONAL/FAMILY DETAILS: If the user asks about personal or family details not in the facts (such as father's name, mother's name, parents, wife, marital status, or exact date of birth), state honestly that this personal detail is not publicly available on his professional portfolio, and suggest contacting him directly at rajashekarchelimala1@gmail.com. Do NOT guess or default to his surname.
 4. GENDER & PRONOUNS: If asked about gender, Rajashekar is Male (pronouns: he/him).
-5. AI PROJECTS: If asked about AI projects, list his specific AI systems:
+5. WEAKNESSES: If asked about weaknesses or areas of improvement, state that Rajashekar approaches engineering with high attention to detail; his identified areas of focus include a tendency towards edge-case perfectionism and taking on multiple complex problems, which he actively manages with strict iterative milestones and agile sprint boundaries.
+6. CHARACTER & PERSONALITY: If asked if he is a "good guy", his work ethic, or attitude, highlight that he is regarded as a dedicated, humble, disciplined, and collaborative engineer with strong ownership and integrity demonstrated across mission-critical GovTech systems at the Centre for Good Governance (CGG).
+7. STRENGTHS & WHAT HE EXCELLS AT: If asked what he is strong at or his core strengths, list: Java & Spring Boot microservices, React.js frontend architecture, PostgreSQL database tuning, AWS cloud infrastructure, and AI/GenAI integration.
+8. AI PROJECTS: If asked about AI projects, list his specific AI systems:
    • AI-Powered Candidate Screening Platform (FastAPI, Whisper.cpp STT, Qwen LLM, AWS EC2, live at https://screener.tekavinya.com)
    • Portfolio RAG AI Assistant (Node.js, Express, Google Gemini, Vector/BM25 Knowledge Engine)
    • Comrade Encrypted Messaging Platform (Socket.io, React, Node.js, end-to-end encryption)
-6. TOP SKILLS: If asked for his top 5 skills, provide a crisp numbered list: Java & Spring Boot, React.js Frontend, PostgreSQL, AWS Cloud & DevOps, and AI/GenAI Integration.
-7. AWS PROJECTS: If asked which projects used AWS, explicitly mention Telangana Police HRMS (EC2, S3, SES) and the AI Candidate Screening Platform (EC2).
-8. CDMA: CDMA refers to the Commissioner & Director of Municipal Administration / Municipal Administration Financial Management System (160+ municipal offices across Telangana using Spring Boot, Hibernate, and PostgreSQL).
-9. FORMATTING: Use clean markdown bullet points (•) and bold text (**) for readability. Keep answers focused directly on the specific question.
+9. TOP SKILLS: If asked for his top 5 skills, provide a crisp numbered list: Java & Spring Boot, React.js Frontend, PostgreSQL, AWS Cloud & DevOps, and AI/GenAI Integration.
+10. AWS PROJECTS: If asked which projects used AWS, explicitly mention Telangana Police HRMS (EC2, S3, SES) and the AI Candidate Screening Platform (EC2).
+11. CDMA: CDMA refers to the Commissioner & Director of Municipal Administration / Municipal Administration Financial Management System (160+ municipal offices across Telangana using Spring Boot, Hibernate, and PostgreSQL).
+12. FORMATTING & COMPLETENESS: Use clean markdown bullet points (•) and bold text (**) for readability. Always complete full thoughts and sentences; never cut off mid-sentence.
 
 === VERIFIED FACTS RETRIEVED FROM RESUME & DATABASE ===
 ${contextText}
@@ -114,10 +117,10 @@ User Question: ${trimmedMessage}`;
             contents: [{ role: "user", parts: [{ text: ragPrompt }] }],
             generationConfig: {
               temperature: 0.2, // Low temperature for high factual accuracy
-              maxOutputTokens: 800,
+              maxOutputTokens: 2048,
             },
           },
-          { headers: { "Content-Type": "application/json" }, timeout: 8000 }
+          { headers: { "Content-Type": "application/json" }, timeout: 9000 }
         );
 
         const aiText = geminiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text;
