@@ -3,19 +3,26 @@ import mongoose from "mongoose";
 import Interaction from "../models/Interaction.js";
 
 export const getAllPosts = async (req, res) => {
-  const posts = await Post.find();
-  if (!posts) return res.status(204).json({ message: "No posts found." });
-  res.json(posts);
+  try {
+    const posts = await Post.find().sort({ createdAt: -1 });
+    res.status(200).json(posts || []);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 export const getPost = async (req, res) => {
   if (!req?.params?.id)
     return res.status(400).json({ message: "Post ID required." });
 
+  if (!isValidObjectId(req.params.id)) {
+    return res.status(404).json({ message: "Post not found." });
+  }
+
   const post = await Post.findOne({ _id: req.params.id }).exec();
   if (!post) {
     return res
-      .status(204)
+      .status(404)
       .json({ message: `No post matches ID ${req.params.id}.` });
   }
   res.json(post);
@@ -72,6 +79,10 @@ export const updatePost = async (req, res) => {
       return res.status(400).json({ message: "ID parameter is required." });
     }
 
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid post ID format." });
+    }
+
     const post = await Post.findById(id).exec();
     if (!post) {
       return res.status(404).json({ message: `No post matches ID ${id}.` });
@@ -91,16 +102,20 @@ export const updatePost = async (req, res) => {
 
 // Like a post
 export const likePost = async (req, res) => {
-    const { id } = req.params;
-    const { visitorId } = req.body;
-    const ipAddress = req.headers["x-forwarded-for"] || req.ip; // Get IP address
-  
-    try {
-      // Find the post
-      const post = await Post.findOne({ _id: id }).exec();
-      if (!post) {
-        return res.status(204).json({ message: `No post matches ID ${id}.` });
-      }
+  const { id } = req.params;
+  const { visitorId } = req.body;
+  const ipAddress = req.headers["x-forwarded-for"] || req.ip;
+
+  if (!isValidObjectId(id)) {
+    return res.status(400).json({ error: "Invalid post ID format." });
+  }
+
+  try {
+    // Find the post
+    const post = await Post.findOne({ _id: id }).exec();
+    if (!post) {
+      return res.status(404).json({ message: `No post matches ID ${id}.` });
+    }
   
       // Check if interaction already exists
       let interaction = await Interaction.findOne({ postId: id, visitorId });
@@ -151,6 +166,10 @@ export const engagePost = async (req, res) => {
   const { id } = req.params;
   const { visitorId } = req.body;
   const ipAddress = req.headers["x-forwarded-for"] || req.ip;
+
+  if (!isValidObjectId(id)) {
+    return res.status(400).json({ error: "Invalid post ID format." });
+  }
 
   try {
     // Check if interaction already exists
