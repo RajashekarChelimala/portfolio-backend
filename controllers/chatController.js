@@ -4,6 +4,7 @@ import { queryRAG, retrieveRelevantChunks, KNOWLEDGE_CORPUS } from "../utils/rag
 import Content from "../models/Content.js";
 import Project from "../models/Project.js";
 import Skill from "../models/Skill.js";
+import AIChatLog from "../models/AIChatLog.js";
 
 dotenv.config();
 
@@ -68,6 +69,10 @@ async function getDynamicCorpus() {
 }
 
 export const handleChat = async (req, res) => {
+  const startTime = Date.now();
+  const visitorId = req.body?.visitorId || "Anonymous";
+  const ipAddress = req.headers["x-forwarded-for"] || req.socket?.remoteAddress || req.ip;
+
   try {
     const { message } = req.body;
     if (!message || typeof message !== "string" || !message.trim()) {
@@ -125,6 +130,25 @@ User Question: ${trimmedMessage}`;
 
         const aiText = geminiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (aiText) {
+          const duration = Date.now() - startTime;
+          AIChatLog.create({
+            visitorId,
+            question: trimmedMessage,
+            answer: aiText,
+            source: "gemini",
+            responseTimeMs: duration,
+            ipAddress,
+          }).catch((logErr) => console.warn("AIChatLog save failed:", logErr.message));
+
+          if (req.io) {
+            req.io.emit("newAIChatLog", {
+              question: trimmedMessage,
+              answer: aiText,
+              source: "gemini",
+              createdAt: new Date().toISOString(),
+            });
+          }
+
           return res.status(200).json({ reply: aiText });
         }
       } catch (geminiError) {
@@ -134,6 +158,25 @@ User Question: ${trimmedMessage}`;
 
     // Direct RAG retrieval fallback response (instant, highly accurate, zero API key required)
     const ragAnswer = queryRAG(trimmedMessage, corpus);
+    const duration = Date.now() - startTime;
+    AIChatLog.create({
+      visitorId,
+      question: trimmedMessage,
+      answer: ragAnswer,
+      source: "rag_engine",
+      responseTimeMs: duration,
+      ipAddress,
+    }).catch((logErr) => console.warn("AIChatLog fallback save failed:", logErr.message));
+
+    if (req.io) {
+      req.io.emit("newAIChatLog", {
+        question: trimmedMessage,
+        answer: ragAnswer,
+        source: "rag_engine",
+        createdAt: new Date().toISOString(),
+      });
+    }
+
     return res.status(200).json({ reply: ragAnswer });
   } catch (err) {
     console.error("Chat controller error:", err);

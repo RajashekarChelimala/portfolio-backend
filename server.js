@@ -23,6 +23,7 @@ import skillRoutes from './routes/skill.js';
 import contentRoutes from './routes/content.js';
 import mediaRoutes from './routes/media.js';
 import chatRoutes from './routes/chat.js';
+import analyticsRoutes from './routes/analytics.js';
 import jwt from 'jsonwebtoken';
 // import refreshRoutes from './routes/refresh.js'; 
 import http from "http";
@@ -112,6 +113,7 @@ app.use('/skills', skillRoutes);
 app.use('/content', contentRoutes);
 app.use('/media', mediaRoutes);
 app.use('/chat', chatRoutes);
+app.use('/analytics', analyticsRoutes);
 
 app.use(verifyJWT);
 app.use('/todo', todoRoutes);
